@@ -8,4 +8,5 @@ Qbox is an advanced core with a load of bloat. Commonly known as a Framework. Ai
 You can also find us on the RedM platform [here](https://github.com/QRCore-RedM-Re)
 
 You can ask for support in our Discord server
+
 <img src="https://discordapp.com/api/guilds/1012753553418354748/widget.png?style=banner3" />
