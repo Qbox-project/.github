@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="512" height="512" src="https://cdn.discordapp.com/attachments/803679370156965920/1033125564661383188/qbox2.png">
+  <img width="128" height="128" src="https://cdn.discordapp.com/attachments/803679370156965920/1033125564661383188/qbox2.png">
 </p>
 
 ## Qbox Project
