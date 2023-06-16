@@ -9,4 +9,4 @@ You can also find us on the RedM platform [here](https://github.com/QRCore-RedM-
 
 You can ask for support in our Discord server
 
-<a href="https://discord.gg/qbox-project-wip-1012753553418354748"><img src="https://discordapp.com/api/guilds/1012753553418354748/widget.png?style=banner4"></a>
+<a href="https://discord.gg/Z6Whda5hHA"><img src="https://discordapp.com/api/guilds/1012753553418354748/widget.png?style=banner4"></a>
