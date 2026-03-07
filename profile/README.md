@@ -10,7 +10,7 @@
 
   [Homepage](https://qbox.re/) •
   [Getting Started](https://docs.qbox.re/) •
-  [RedM Version](https://github.com/QRCore-RedM-Re)
+  [Discord](https://discord.gg/Z6Whda5hHA)
 
   ### [_Join our community!_](https://discord.gg/Z6Whda5hHA)
   
