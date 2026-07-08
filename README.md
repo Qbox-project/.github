@@ -34,6 +34,6 @@ jobs:
 | `lint.yml` | — | — |
 | `release.yml` | `version` (required) | `APP_ID`, `PRIVATE_KEY` |
 | `release-action.yml` | `tag` (optional) | `APP_ID`, `PRIVATE_KEY` |
-| `discord-commit.yml` | — | `WEBHOOK_ID`, `WEBHOOK_TOKEN` |
+| `discord-commit.yml` | — | `DISCORD_COMMIT_WEBHOOK` |
 | `discord-release.yml` | — | `WEBHOOK_URL` |
 | `issues-project.yml` | — | `APP_ID`, `PRIVATE_KEY` |
