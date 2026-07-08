@@ -1,0 +1,60 @@
+name: Create New Release
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+    secrets:
+      APP_ID:
+        required: true
+      PRIVATE_KEY:
+        required: true
+
+jobs:
+  create-release:
+    name: Create New Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get App Token
+        uses: actions/create-github-app-token@v1
+        id: generate_token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Bump manifest version
+        run: |
+          node -e "
+          const fs = require('fs')
+          const version = process.env.TGT_RELEASE_VERSION
+          const newVersion = version.replace('v', '')
+          const manifestFile = fs.readFileSync('fxmanifest.lua', {encoding: 'utf8'})
+          const versionStr = \`version '\${newVersion}'\`
+          let newFileContent = manifestFile.replace(/\bversion\s+(.*)$/gm, versionStr)
+          if (!newFileContent.includes(versionStr)) {
+              newFileContent = manifestFile.replace(/\bgame\s+(.*)$/gm, \`game 'gta5'\n\${versionStr}\`);
+          }
+          fs.writeFileSync('fxmanifest.lua', newFileContent)
+          "
+        env:
+          TGT_RELEASE_VERSION: ${{ inputs.version }}
+
+      - name: Push manifest change
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: fxmanifest.lua
+          push: true
+          message: 'chore: bump manifest version to ${{ inputs.version }}'
+          tag: ${{ inputs.version }}
