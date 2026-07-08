@@ -5,7 +5,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please use our Discord Server to ask questions and receive support: https://discord.gg/Z6Whda5hHA
+        Thank you for taking the time to suggest an improvement!
+
+        For large features or design changes, please discuss your idea on the [Qbox Discord server](https://discord.gg/Z6Whda5hHA) first to make sure it fits the project before opening an issue.
+
+        Please use Discord for questions and support — issues are not for general questions.
   - type: textarea
     id: problem
     attributes:
