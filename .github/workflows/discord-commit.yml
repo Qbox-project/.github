@@ -11,6 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Notify Discord
-        uses: Qbox-project/pipeline-pling@v1
+        uses: Qbox-project/pipeline-pling@v1.1.0
         with:
           webhook-url: ${{ secrets.DISCORD_COMMIT_WEBHOOK }}
