@@ -6,12 +6,15 @@ on:
       DISCORD_COMMIT_WEBHOOK:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   notify:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Notify Discord
-        uses: Qbox-project/pipeline-pling@v1.1.0
+        uses: Qbox-project/pipeline-pling@696afc4532ae04a07807bb050957691bb7d0c80b # v1.1.0
         with:
           webhook-url: ${{ secrets.DISCORD_COMMIT_WEBHOOK }}
