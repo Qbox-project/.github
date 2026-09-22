@@ -1,0 +1,107 @@
+name: Publish release artifacts
+
+on:
+  workflow_call:
+    inputs:
+      artifact-pattern:
+        description: Pattern matching the build artifacts uploaded by this workflow run
+        required: true
+        type: string
+      tag:
+        description: Existing release tag; defaults to the caller's tag
+        required: false
+        type: string
+        default: ""
+    secrets:
+      APP_ID:
+        required: true
+      PRIVATE_KEY:
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - name: Check release context
+        shell: bash
+        run: |
+          set -euo pipefail
+          git check-ref-format "refs/tags/${RELEASE_TAG}"
+          if [ "${GITHUB_REF}" != "refs/tags/${RELEASE_TAG}" ]; then
+            echo "Release artifacts must come from a workflow running on tag ${RELEASE_TAG}." >&2
+            exit 1
+          fi
+
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ inputs.tag || github.ref_name }}
+          persist-credentials: false
+
+      - name: Verify source commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_commit="$(git rev-parse --verify "refs/tags/${RELEASE_TAG}^{commit}")"
+          source_commit="$(git rev-parse --verify "${GITHUB_SHA}^{commit}")"
+          if [ "${tag_commit}" != "${source_commit}" ] || [ "$(git rev-parse HEAD)" != "${source_commit}" ]; then
+            echo "The release tag does not match the source commit for this workflow run." >&2
+            exit 1
+          fi
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ${{ inputs.artifact-pattern }}
+          merge-multiple: true
+          path: ${{ runner.temp }}/release-artifacts
+
+      - name: Validate assets and create checksums
+        shell: python
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/release-artifacts
+        run: |
+          import hashlib
+          import os
+          from pathlib import Path
+
+          root = Path(os.environ["ARTIFACT_DIR"])
+          assets = sorted(path for path in root.iterdir() if path.name != "SHA256SUMS")
+          if not assets:
+              raise SystemExit("No release assets matched the artifact pattern.")
+          checksums = []
+          for path in assets:
+              if path.is_symlink() or not path.is_file() or not path.name.endswith((".zip", ".tar.gz", ".vsix")):
+                  raise SystemExit(f"Expected a ZIP, tar.gz or VSIX asset, found: {path.name}")
+              if "\n" in path.name or "\r" in path.name or "\\" in path.name:
+                  raise SystemExit(f"Unsupported asset filename: {path.name!r}")
+              digest = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                      digest.update(chunk)
+              checksums.append(f"{digest.hexdigest()}  {path.name}\n")
+          (root / "SHA256SUMS").write_text("".join(checksums), encoding="utf-8")
+
+      - name: Get release token
+        uses: actions/create-github-app-token@v1
+        id: app
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Publish release
+        uses: ncipollo/release-action@v1.14.0
+        with:
+          token: ${{ steps.app.outputs.token }}
+          tag: ${{ inputs.tag || github.ref_name }}
+          name: ${{ inputs.tag || github.ref_name }}
+          draft: false
+          allowUpdates: true
+          artifacts: ${{ runner.temp }}/release-artifacts/*
+          artifactErrorsFailBuild: true
+          body: Changes are listed in the [changelog](https://github.com/${{ github.repository }}/blob/${{ inputs.tag || github.ref_name }}/CHANGELOG.md).

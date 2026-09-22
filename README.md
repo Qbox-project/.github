@@ -34,6 +34,32 @@ jobs:
 | `lint.yml` | — | — |
 | `release.yml` | `version` (required) | `APP_ID`, `PRIVATE_KEY` |
 | `release-action.yml` | `tag` (optional) | `APP_ID`, `PRIVATE_KEY` |
+| `release-artifacts.yml` | `artifact-pattern` (required), `tag` (optional) | `APP_ID`, `PRIVATE_KEY` |
 | `discord-commit.yml` | — | `DISCORD_COMMIT_WEBHOOK` |
 | `discord-release.yml` | — | `WEBHOOK_URL` |
 | `issues-project.yml` | — | `APP_ID`, `PRIVATE_KEY` |
+
+### Compiled tools and editor packages
+
+Use `release-artifacts.yml` for repositories that build binaries or VSIX packages. Keep the
+platform build jobs in the calling repository and upload their archives with
+`actions/upload-artifact@v4`. Once every build succeeds, call the shared publisher:
+
+```yaml
+publish:
+  needs: build
+  uses: Qbox-project/.github/.github/workflows/release-artifacts.yml@main
+  with:
+    artifact-pattern: binary-*
+  secrets: inherit
+```
+
+The caller must run on the release tag and allow `contents: read`. The publisher accepts flat
+ZIP, tar.gz and VSIX files, adds `SHA256SUMS`, and verifies that the tag matches the build's
+source commit. Release notes link to the changelog at that tag. The GitHub App must be installed
+on the calling repository with permission to write repository contents.
+
+This uses the App token so publishing a release also triggers a caller's `release: published`
+workflow. Call `discord-release.yml` from that event to announce releases; call
+`discord-commit.yml` on pushes to `main` for commit notifications. Both callers use
+`secrets: inherit`.
