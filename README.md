@@ -56,7 +56,8 @@ publish:
 
 The caller must run on the release tag and allow `contents: read`. The publisher accepts flat
 ZIP, tar.gz and VSIX files, adds `SHA256SUMS`, and verifies that the tag matches the build's
-source commit. Release notes link to the changelog at that tag. The GitHub App must be installed
+source commit. Release notes are generated from the commits since the previous tag, as in
+`release-action.yml`; the first tag of a repository gets an empty body. The GitHub App must be installed
 on the calling repository with permission to write repository contents.
 
 This uses the App token so publishing a release also triggers a caller's `release: published`

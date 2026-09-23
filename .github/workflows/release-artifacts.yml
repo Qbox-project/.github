@@ -94,6 +94,17 @@ jobs:
           app-id: ${{ secrets.APP_ID }}
           private-key: ${{ secrets.PRIVATE_KEY }}
 
+      - name: Generate release notes
+        id: changelog
+        uses: requarks/changelog-action@v1
+        continue-on-error: true
+        with:
+          token: ${{ steps.app.outputs.token }}
+          tag: ${{ inputs.tag || github.ref_name }}
+          includeInvalidCommits: true
+          useGitmojis: false
+          writeToFile: false
+
       - name: Publish release
         uses: ncipollo/release-action@v1.14.0
         with:
@@ -104,4 +115,4 @@ jobs:
           allowUpdates: true
           artifacts: ${{ runner.temp }}/release-artifacts/*
           artifactErrorsFailBuild: true
-          body: Changes are listed in the [changelog](https://github.com/${{ github.repository }}/blob/${{ inputs.tag || github.ref_name }}/CHANGELOG.md).
+          body: ${{ steps.changelog.outputs.changes }}
